@@ -1,5 +1,5 @@
-use ../path.nu *
-use ../fs.nu *
+use path.nu *
+use fs.nu *
 
 def addBookmarks [new: list<record>, from_abs: string]: list<record> -> list<record> {
     mut bookmarks = $in

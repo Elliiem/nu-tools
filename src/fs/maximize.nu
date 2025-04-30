@@ -123,15 +123,15 @@ def getCanidates [dirname: string]: list<record> -> list<record> {
     return $canidates
 }
 
-export def resolve [fs: record]: string -> string {
+export def maximizePath [fs: record]: string -> string {
     let span = ((metadata $in).span)
 
     let dirpath = $in | splitPath $span
 
-    mut resolved_dirpath = ["/"]
+    mut maximized = ["/"]
 
     for dir in $dirpath {
-        let cur_path = $resolved_dirpath | path join
+        let cur_path = $maximized | path join
 
         let canidates = ($fs | availableCompletions $cur_path | getCanidates $dir.name)
 
@@ -181,11 +181,11 @@ export def resolve [fs: record]: string -> string {
         }
 
         if ($resolved_canidate.is_bookmark) {
-            $resolved_dirpath = $resolved_dirpath | append ($resolved_canidate.path | path relative-to $cur_path)
+            $maximized = $maximized | append ($resolved_canidate.path | path relative-to $cur_path)
         } else {
-            $resolved_dirpath = $resolved_dirpath | append ($resolved_canidate.name)
+            $maximized = $maximized | append ($resolved_canidate.name)
         }
     }
 
-    return ($resolved_dirpath | path join);
+    return ($maximized | path join);
 }
