@@ -1,44 +1,6 @@
-export def getChild [child: string]: record -> record {
-    let parent = $in
+use dir.nu
 
-    for child_dir in $parent.children {
-        if (($child_dir.path | path basename) == $child) {
-            return $child_dir
-        }
-    }
-
-    return null
-}
-
-export def hasChild [child: string]: record -> bool {
-    let parent = $in
-
-    for child_dir in $parent.children {
-        if (($child_dir.path | path basename) == $child) {
-            return true
-        }
-    }
-
-    return false
-}
-
-export def getChildIndex [child: string]: record -> int {
-    let parent = $in
-
-    mut i = 0
-
-    for child_dir in $parent.children {
-        if (($child_dir.path | path basename) == $child) {
-            return $i
-        }
-
-        $i += 1
-    }
-
-    return null
-}
-
-export def ensurePath [path_abs: string]: record -> record {
+export def ensure-dir [path_abs: string]: record -> record {
     let fs = $in
 
     mut modified = $fs
@@ -53,7 +15,7 @@ export def ensurePath [path_abs: string]: record -> record {
 
         let cur_dir = ($modified | get ($cur_cellpath_list | into cell-path))
 
-        if (not ($cur_dir | hasChild $dirname)) {
+        if (not ($cur_dir | dir has-child $dirname)) {
             let children_cellpath = ($cur_cellpath_list | append "children" | into cell-path )
 
             $cur_cellpath_list = $cur_cellpath_list | append ["children", ($modified | get $children_cellpath | length)]
@@ -66,33 +28,33 @@ export def ensurePath [path_abs: string]: record -> record {
                 children: [],
             })
         } else {
-            $cur_cellpath_list = $cur_cellpath_list | append ["children", ($cur_dir | getChildIndex $dirname)]
+            $cur_cellpath_list = $cur_cellpath_list | append ["children", ($cur_dir | dir child-index  $dirname)]
         }
     }
 
     return $modified
 }
 
-export def getDir [path_abs: string]: record -> record {
+export def get-dir [path_abs: string]: record -> record {
     let dirpath = ($path_abs | path split | skip 1)
 
     mut cur = $in
 
     for dir in $dirpath {
-        $cur = $cur | getChild $dir
+        $cur = $cur | dir child $dir
     }
 
     return $cur
 }
 
-export def getDirListCellpath [path_abs: string]: record -> list<string> {
+export def get-cellpath [path_abs: string]: record -> list<string> {
     let dirpath = ($path_abs | path split | skip 1)
 
     mut path = []
     mut cur = $in
 
     for dir in $dirpath {
-        let child_i = $cur | getChildIndex $dir
+        let child_i = $cur | dir child-index $dir
 
         match ($child_i) {
             null => {
@@ -103,7 +65,7 @@ export def getDirListCellpath [path_abs: string]: record -> list<string> {
             }
         }
 
-        $cur = $cur | getChild $dir
+        $cur = $cur | dir child $dir
     }
 
 
