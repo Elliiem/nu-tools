@@ -1,3 +1,15 @@
+
+export def empty [path: string]: nothing -> record {
+    return {
+        name: ($path | path basename),
+        path: $path,
+        repr: null,
+        is_reldir: false,
+        bookmarks: [],
+        children: [],
+    }
+}
+
 export def child [child: string]: record -> record {
     let parent = $in
 

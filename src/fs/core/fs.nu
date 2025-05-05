@@ -14,20 +14,15 @@ export def ensure-dir [path_abs: string]: record -> record {
         $cur_dirpath = $cur_dirpath | append $dirname
 
         let cur_dir = ($modified | get ($cur_cellpath_list | into cell-path))
+        let cur_path = ($cur_dirpath | path join)
 
         if (not ($cur_dir | dir has-child $dirname)) {
             let children_cellpath = ($cur_cellpath_list | append "children" | into cell-path )
+            let modified_children = ($cur_dir.children | append (dir empty $cur_path))
 
-            $cur_cellpath_list = $cur_cellpath_list | append ["children", ($modified | get $children_cellpath | length)]
+            $modified = $modified | update  $children_cellpath $modified_children
 
-            $modified = $modified | update  $children_cellpath (($modified | get $children_cellpath) | append {
-                name: ($cur_dirpath | last)
-                path: ($cur_dirpath | path join),
-                repr: null,
-                is_reldir: false,
-                bookmarks: [],
-                children: [],
-            })
+            $cur_cellpath_list = $cur_cellpath_list | append ["children", ($cur_dir.children | length)]
         } else {
             $cur_cellpath_list = $cur_cellpath_list | append ["children", ($cur_dir | dir child-index  $dirname)]
         }
@@ -75,3 +70,28 @@ export def get-cellpath [path_abs: string]: record -> list<string> {
 
     return $path
 }
+
+def _where [cond: closure]: record -> list<record> {
+    let root = $in
+
+    mut dirs = []
+
+    if ($root | do $cond) {
+        $dirs = $dirs | append $root
+    }
+
+    for child in $root.children {
+        $dirs = $dirs | append ($child | _where $cond)
+    }
+
+    return $dirs
+}
+
+export def where [cond: closure]: record -> list<record> {
+    return ($in | _where $cond)
+}
+
+
+
+
+
