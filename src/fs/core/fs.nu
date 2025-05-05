@@ -76,7 +76,15 @@ def _where [cond: closure]: record -> list<record> {
 
     mut dirs = []
 
-    if ($root | do $cond) {
+    let is_selected = $root | do $cond
+
+    if (($is_selected | describe) != "bool") {
+        error make {
+            msg: "condition closure must return a boolean!",
+        }
+    }
+
+    if ($is_selected) {
         $dirs = $dirs | append $root
     }
 
