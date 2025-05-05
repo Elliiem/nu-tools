@@ -14,7 +14,7 @@ export def has-child [child: string]: record -> bool {
     let parent = $in
 
     for child_dir in $parent.children {
-        if (($child_dir.name | fs path basename) == $child) {
+        if (($child_dir.name | path basename) == $child) {
             return true
         }
     }

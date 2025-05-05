@@ -21,6 +21,7 @@ export def ensure-dir [path_abs: string]: record -> record {
             $cur_cellpath_list = $cur_cellpath_list | append ["children", ($modified | get $children_cellpath | length)]
 
             $modified = $modified | update  $children_cellpath (($modified | get $children_cellpath) | append {
+                name: ($cur_dirpath | last)
                 path: ($cur_dirpath | path join),
                 repr: null,
                 is_reldir: false,
@@ -71,7 +72,6 @@ export def get-cellpath [path_abs: string]: record -> list<string> {
 
         $cur = $cur | dir child $dir
     }
-
 
     return $path
 }
