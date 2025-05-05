@@ -25,16 +25,16 @@ export def main [fs: record]: string -> string {
 
     mut maximized = "/"
 
-    let dests = $maximized | destinations $fs
+    for dir in $dirpath {
+        let dests = $maximized | destinations $fs
+        let dest = $dests | select dest $dir $fs
 
-    ($dests | select dest ($dirpath | first) $fs).val | print
+        $dest | print
 
+        $maximized = $maximized | path join $dest.path
+    }
 
-
-
-
-    return $in
-
+    return $maximized
 }
 
 # export def main [fs: record]: string -> string {

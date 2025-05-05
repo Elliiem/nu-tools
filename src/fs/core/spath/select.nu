@@ -107,15 +107,15 @@ export module dest {
         return ($better_score or $better_bmness or $better_reprness);
     }
 
-
     def has-better-meta-force-bm [cmp: record]: record -> bool {
         let dest = $in
 
         let better_score = ($dest.score > $cmp.score)
+        let better_bmness = (not $cmp.val.is_bookmark)
+        let better_reprness = ((not $dest.val.is_repr) and $cmp.val.is_repr)
 
-        return $better_score;
+        return ($better_score or $better_bmness or $better_reprness);
     }
-
 
     def has-better-name [cmp: record]: record -> bool {
         let dest = $in
@@ -136,6 +136,8 @@ export module dest {
         } else {
             return false
         }
+
+        return false
     }
 
 
@@ -145,7 +147,7 @@ export module dest {
         for dest in $in {
             let score = (score-similarity $dest.name $dir.name)
 
-            if ($score >= 70) {
+            if ($score >= 50) {
                 $ret = $ret | append {
                     val: $dest,
                     score: $score,
@@ -158,18 +160,9 @@ export module dest {
 
 
     export def force-bm [dir: record, fs: record]: list<record> -> record {
-        return $in
-    }
+        let dests = ($in | select-valid-destinations $dir)
 
-
-    export def main [dir: record, fs: record]: list<record> -> record {
-        if ($dir.use_bookmark) {
-            return ($in | force-bm $dir $fs)
-        }
-
-        let destinations = ($in | select-valid-destinations $dir)
-
-        if ($destinations | is-empty) {
+        if ($dests | is-empty) {
             if ($dir.span != null) {
                 error make {
                     msg: "No available destination",
@@ -185,10 +178,14 @@ export module dest {
             }
         }
 
-        mut best = ($destinations | first 1)
+        mut best = ($dests | first)
 
-        for dest in ($destinations | skip 1) {
-            if ($dest | has-better-meta-smallest $best) {
+        for dest in ($dests | skip 1) {
+            if (not $dest.val.is_bookmark) {
+                continue
+            }
+
+            if ($dest | has-better-meta-force-bm $best) {
                 $best = $dest
                 continue
             }
@@ -215,7 +212,80 @@ export module dest {
             }
         }
 
-        return $best
+        if (not $best.val.is_bookmark) {
+            if ($dir.span != null) {
+                error make {
+                    msg: "No available bookmark",
+                    label: {
+                        text: "to this dir",
+                        span: $dir.span
+                    }
+                }
+            } else {
+                error make {
+                    msg: ("No available bookmark with name: " + $dir.name),
+                }
+            }
+        }
+
+        return $best.val
+    }
+
+
+    export def main [dir: record, fs: record]: list<record> -> record {
+        if ($dir.use_bookmark) {
+            return ($in | force-bm $dir $fs)
+        }
+
+        let destinations = ($in | select-valid-destinations $dir)
+
+        if ($destinations | is-empty) {
+            if ($dir.span != null) {
+                error make {
+                    msg: "No available destination",
+                    label: {
+                        text: "to this dir",
+                        span: $dir.span
+                    }
+                }
+            } else {
+                error make {
+                    msg: ("No available destination with name: " + $dir.name),
+                }
+            }
+        }
+
+        mut best = ($destinations | first)
+
+        for dest in ($destinations | skip 1) {
+            if ($dest | has-better-meta $best) {
+                $best = $dest
+                continue
+            }
+
+            if ($dest.score == 100 and $best.score == 100) {
+                if ($dest | has-better-name $best) {
+                    $best = $dest
+                    continue
+                }
+
+                if ($dir.span != null) {
+                    error make {
+                        msg: "Multiple destinations are available",
+                        label: {
+                            text: "to this dir",
+                            span: $dir.span
+                        }
+                    }
+                } else {
+                    error make {
+                        msg: ("Multiple destinations are available for dir with name: " + $dir.name),
+                    }
+                }
+            }
+        }
+
+        return $best.val
     }
 
 }

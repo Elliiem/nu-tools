@@ -41,6 +41,10 @@ export def get-dir [path_abs: string]: record -> record {
     mut cur = $in
 
     for dir in $dirpath {
+        if ($cur == null) {
+            return null
+        }
+
         $cur = $cur | dir child $dir
     }
 

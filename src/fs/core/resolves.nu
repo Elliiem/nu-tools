@@ -17,7 +17,7 @@ export def destinations [fs: record]: string -> list<record> {
         }
     })
 
-    let children = (ls $path_abs)
+    let children = (ls -a $path_abs)
 
     for child in $children {
         let dest = ($child.name | path basename)
