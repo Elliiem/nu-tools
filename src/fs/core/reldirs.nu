@@ -17,5 +17,11 @@ export def with-name [name: string]: record -> list<record> {
         }
 
         return false
+    } | each {
+        {
+            name: $in.name,
+            path: $in.path,
+            repr: $in.repr,
+        }
     })
 }
