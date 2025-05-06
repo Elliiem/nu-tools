@@ -1,10 +1,14 @@
+use std assert
 
-use std/assert
+use ../path.nu
 
 export def minimzed [span?: record]: string -> list<record> {
     if ($span != null) {
         assert ($span | meta span is-str-literal) "Expected string literal span!"
     }
+
+    let path = $in | path reldir remove
+    assert ($path | str starts-with "/")
 
     mut ret = []
 
@@ -17,7 +21,7 @@ export def minimzed [span?: record]: string -> list<record> {
     mut dirname_start = 0
     mut dirname_end = 0
 
-    for char in ($in | split chars | skip 1) {
+    for char in ($path | split chars | skip 1) {
         match ($char) {
             '/' => {
                 if ($parsing_dirname) {

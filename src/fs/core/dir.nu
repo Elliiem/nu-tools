@@ -1,4 +1,3 @@
-
 export def empty [path: string]: nothing -> record {
     return {
         name: ($path | path basename),

@@ -1,7 +1,7 @@
 use fs.nu
 
 export def with-name [name: string]: record -> list<record> {
-    return ($in | fs where {
+    return ($in | fs where-dir {
         let dir = $in
 
         if ($dir.is_reldir) {

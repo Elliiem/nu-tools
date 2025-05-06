@@ -1,8 +1,13 @@
 use dir.nu
+use path.nu
 
 use ../../util *
 
+use std assert
+
 export def ensure-dir [path_abs: string]: record -> record {
+    assert ($path_abs | path is-absolute) "Given path is not absolute!"
+
     let fs = $in
 
     mut modified = $fs
@@ -32,6 +37,8 @@ export def ensure-dir [path_abs: string]: record -> record {
 }
 
 export def get-dir [path_abs: string]: record -> record {
+    assert ($path_abs | path is-absolute) "Given path is not absolute!"
+
     let dirpath = ($path_abs | path split | skip 1)
 
     mut cur = $in
@@ -48,6 +55,8 @@ export def get-dir [path_abs: string]: record -> record {
 }
 
 export def get-cellpath [path_abs: string]: record -> list<string> {
+    assert ($path_abs | path is-absolute) "Given path is not absolute!"
+
     let dirpath = ($path_abs | path split | skip 1)
 
     mut path = []
@@ -71,7 +80,7 @@ export def get-cellpath [path_abs: string]: record -> list<string> {
     return $path
 }
 
-export def where [cond: closure]: record -> list<record> {
+export def where-dir [cond: closure]: record -> list<record> {
     let root = $in
 
     mut dirs = []

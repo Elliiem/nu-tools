@@ -1,12 +1,15 @@
 use fs.nu
 use bookmark.nu
+use path.nu
 
 export def destinations [fs: record]: string -> list<record> {
-    let path_abs = $in
+    assert ($in | path is-absolute) "Given path is not absolute!"
+
+    let path = $in
 
     mut replacements = []
 
-    $replacements = $replacements | append ($path_abs | bookmark available $fs | each {
+    $replacements = $replacements | append ($path | bookmark available $fs | each {
         let bm = $in
 
         return {
@@ -17,7 +20,7 @@ export def destinations [fs: record]: string -> list<record> {
         }
     })
 
-    let children = (ls -a $path_abs)
+    let children = (ls -a $path)
 
     for child in $children {
         let dest = ($child.name | path basename)
@@ -29,7 +32,7 @@ export def destinations [fs: record]: string -> list<record> {
             is_repr: false,
         }
 
-        let dir = ($fs | fs get-dir ($path_abs | path join $child.name))
+        let dir = ($fs | fs get-dir ($path | path join $child.name))
 
         if ($dir != null and $dir.repr != null) {
             $replacements = $replacements | append {

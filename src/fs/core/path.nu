@@ -7,6 +7,10 @@ export def is-child [root: string]: string -> bool {
     }
 }
 
+export def is-absolute []: string -> bool {
+    $in | str starts-with "/"
+}
+
 export module reldir {
     export def remove []: string -> string {
         let path = $in
