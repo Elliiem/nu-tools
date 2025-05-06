@@ -71,7 +71,7 @@ export def get-cellpath [path_abs: string]: record -> list<string> {
     return $path
 }
 
-def _where [cond: closure]: record -> list<record> {
+export def where [cond: closure]: record -> list<record> {
     let root = $in
 
     mut dirs = []
@@ -85,21 +85,12 @@ def _where [cond: closure]: record -> list<record> {
     }
 
     if ($is_selected) {
-        $dirs = $dirs | append $root
+        $dirs = $dirs | append ($root | dir detach)
     }
 
     for child in $root.children {
-        $dirs = $dirs | append ($child | _where $cond)
+        $dirs = $dirs | append ($child | where $cond)
     }
 
     return $dirs
 }
-
-export def where [cond: closure]: record -> list<record> {
-    return ($in | _where $cond)
-}
-
-
-
-
-

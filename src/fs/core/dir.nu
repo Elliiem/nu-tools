@@ -49,3 +49,15 @@ export def child-index [child: string]: record -> int {
 
     return null
 }
+
+export def detach []: record -> record {
+    let dir = $in
+
+    return {
+        name: $dir.name,
+        path: $dir.path,
+        repr: $dir.repr,
+        is_relird: $dir.is_reldir,
+        bookmarks: $dir.bookmarks,
+    }
+}
