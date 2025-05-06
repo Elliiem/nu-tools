@@ -1,30 +1,30 @@
 use dir.nu
 
+use ../../util *
+
 export def ensure-dir [path_abs: string]: record -> record {
     let fs = $in
 
     mut modified = $fs
 
-    mut cur_cellpath_list = []
-    mut cur_dirpath = []
+    mut cur_cellpath = cell-path empty
+    mut cur_path = "/"
 
     let dirpath = ($path_abs | path split | skip 1)
 
     for dirname in $dirpath {
-        $cur_dirpath = $cur_dirpath | append $dirname
+        let cur_dir = ($modified | get $cur_cellpath)
 
-        let cur_dir = ($modified | get ($cur_cellpath_list | into cell-path))
-        let cur_path = ($cur_dirpath | path join)
+        $cur_path = $cur_path | path join $dirname
 
         if (not ($cur_dir | dir has-child $dirname)) {
-            let children_cellpath = ($cur_cellpath_list | append "children" | into cell-path )
             let modified_children = ($cur_dir.children | append (dir empty $cur_path))
 
-            $modified = $modified | update  $children_cellpath $modified_children
+            $modified = $modified | update (cell-path concat $cur_cellpath $.children) $modified_children
 
-            $cur_cellpath_list = $cur_cellpath_list | append ["children", ($cur_dir.children | length)]
+            $cur_cellpath = cell-path concat $cur_cellpath ["children", ($cur_dir.children | length)]
         } else {
-            $cur_cellpath_list = $cur_cellpath_list | append ["children", ($cur_dir | dir child-index  $dirname)]
+            $cur_cellpath = cell-path concat $cur_cellpath ["children", ($cur_dir | dir child-index  $dirname)]
         }
     }
 
