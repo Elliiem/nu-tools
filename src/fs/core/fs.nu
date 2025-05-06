@@ -85,20 +85,22 @@ export def where-dir [cond: closure]: record -> list<record> {
 
     mut dirs = []
 
-    let is_selected = $root | do $cond
+    if ("name" in $root) {
+        let is_selected = $root | do $cond
 
-    if (($is_selected | describe) != "bool") {
-        error make {
-            msg: "condition closure must return a boolean!",
+        if (($is_selected | describe) != "bool") {
+            error make {
+                msg: "condition closure must return a boolean!",
+            }
+        }
+
+        if ($is_selected) {
+            $dirs = $dirs | append ($root | dir detach)
         }
     }
 
-    if ($is_selected) {
-        $dirs = $dirs | append ($root | dir detach)
-    }
-
     for child in $root.children {
-        $dirs = $dirs | append ($child | where $cond)
+        $dirs = $dirs | append ($child | where-dir $cond)
     }
 
     return $dirs

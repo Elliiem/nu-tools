@@ -11,7 +11,7 @@ def append-override [new: list<record>, from_abs: string]: list<record> -> list<
     mut ret = []
 
     for bookmark in $bookmarks {
-        if ((not ($new | any {$in.name == $bookmark.name})) and ($bookmark.path | path check is-child $from_abs)) {
+        if ((not ($new | any {$in.name == $bookmark.name})) and ($bookmark.path | path is-child $from_abs)) {
             $ret = ($ret | append $bookmarks | get $i)
         }
 

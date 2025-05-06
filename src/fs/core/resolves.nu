@@ -2,6 +2,8 @@ use fs.nu
 use bookmark.nu
 use path.nu
 
+use std assert
+
 export def destinations [fs: record]: string -> list<record> {
     assert ($in | path is-absolute) "Given path is not absolute!"
 

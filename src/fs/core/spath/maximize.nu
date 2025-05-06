@@ -1,10 +1,11 @@
-use ../resolves.nu *
-
 use ../../../meta
+
+use ../resolves.nu *
+use ../path.nu
+use ../reldirs.nu
 
 use split.nu
 use select.nu
-
 
 def get-path-span []: record -> record {
     let span = $in
@@ -23,13 +24,19 @@ export def main [fs: record]: string -> string {
 
     let dirpath = ($minimized | split minimzed $span)
 
-    mut maximized = "/"
+    let reldirs =  $fs | reldirs with-name ($minimized | path reldir get)
+
+    if (($reldirs | length) > 1) {
+        error make {
+            msg: "Multiple reldirs with the given name!",
+        }
+    }
+
+    mut maximized = ($reldirs | first).path
 
     for dir in $dirpath {
         let dests = $maximized | destinations $fs
         let dest = $dests | select dest $dir $fs
-
-        $dest | print
 
         $maximized = $maximized | path join $dest.path
     }
