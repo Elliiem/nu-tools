@@ -51,9 +51,23 @@ def _split []: [
     return null
 }
 
-export def _concat [x: any, y: any]: nothing -> cell-path {
+alias _append = append
+
+export def concat [x: any, y: any]: nothing -> cell-path {
     let x_split = $x | _split
     let y_split = $y | _split
 
-    return ($x_split | append $y_split | into cell-path)
+    return ($x_split | _append $y_split | into cell-path)
+}
+
+export def append [y: any]: [
+    cell-path -> cell-path,
+    list<any> -> cell-path,
+    table<value: string, optional: bool> -> cell-path
+] {
+    concat $in $y
+}
+
+export def empty []: nothing -> cell-path {
+    $.
 }
